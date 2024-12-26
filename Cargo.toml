@@ -73,7 +73,7 @@ assign-resources = "0.4.1"
 overlay = "1.0"
 overlay_macro = "2.0"
 
-day1 = { path = "./advent_2024/day1", version = "0.1.0" }
+embedded-alloc = "0.6.0"
 
 # cargo build/run
 [profile.dev]
