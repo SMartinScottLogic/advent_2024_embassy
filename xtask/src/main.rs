@@ -26,6 +26,13 @@ fn setup() -> AnyResult<()> {
         let contents = contents.replace("template", &entry);
         std::fs::write(filename, contents)?;
     }
+
+    // Patch runner
+    let runner_filename = PathBuf::from(&entry).join("examples").join("runner.rs");
+    let mut runner_contents = std::fs::read_to_string(&runner_filename)?;
+    let runner_contents = runner_contents.replace("template", &entry);
+    std::fs::write(&runner_filename, runner_contents)?;
+
     // Add entry to workspace
     println!("* setup Cargo.toml");
 
@@ -34,7 +41,30 @@ fn setup() -> AnyResult<()> {
     toml["workspace"]["members"]
         .as_array_mut()
         .context("read workspace members")?
-        .push(entry);
+        .push(&entry);
     std::fs::write("Cargo.toml", toml.to_string())?;
+
+    // // Setup launcher
+    // println!("* setup launcher");
+
+    // let launcher_toml_path = PathBuf::from(".").join("local_runner").join("Cargo.toml");
+    // let launcher_toml_contents = std::fs::read_to_string(&launcher_toml_path)?;
+    // let mut toml = launcher_toml_contents.parse::<toml_edit::DocumentMut>()?;
+    // toml["dependencies"]
+    //     .as_table_mut()
+    //     .context("read local runner dependencies")?
+    //     .entry(&entry)
+    //     .or_insert_with(|| {
+    //         let mut table = toml_edit::table();
+    //         table
+    //             .as_table_mut()
+    //             .context("add dependency")
+    //             .unwrap()
+    //             .entry("path")
+    //             .or_insert(format!("../{}", entry).into());
+    //         table
+    //     });
+
+    // std::fs::write(launcher_toml_path, toml.to_string())?;
     Ok(())
 }
