@@ -1,0 +1,136 @@
+[package]
+edition = "2021"
+name = "embassy_runner"
+version = "0.1.0"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+embedded-hal = { version = "0.2.5", features = ["unproven"] }
+
+defmt = "0.3"
+defmt-rtt = "0.4"
+panic-probe = { version = "0.3", features = ["print-defmt"] }
+
+embassy-embedded-hal = { version = "0.1.0", features = ["defmt"] }
+embassy-sync = { version = "0.5.0", features = ["defmt"] }
+embassy-executor = { version = "0.5.0", features = [
+    "task-arena-size-32768",
+    "arch-cortex-m",
+    "executor-thread",
+    "executor-interrupt",
+    "defmt",
+    "integrated-timers",
+] }
+embassy-time = { version = "0.3.0", features = [
+    "defmt",
+    "defmt-timestamp-uptime",
+] }
+embassy-rp = { version = "0.1.0", features = [
+    "defmt",
+    "unstable-pac",
+    "time-driver",
+    "critical-section-impl",
+] }
+embassy-usb = { version = "0.1.0", features = ["defmt"] }
+embassy-net = { version = "0.4.0", features = [
+    "defmt",
+    "tcp",
+    "udp",
+    "dhcpv4",
+    "medium-ethernet",
+] }
+embassy-net-wiznet = { version = "0.1.0", features = ["defmt"] }
+embassy-futures = { version = "0.1.0" }
+embassy-usb-logger = { version = "0.1.0" }
+cyw43 = { version = "0.1.0", features = ["defmt", "firmware-logs"] }
+cyw43-pio = { version = "0.1.0", features = ["defmt", "overclock"] }
+
+# but you can use any BSP. Uncomment this to use the pro_micro_rp2040 BSP instead
+# sparkfun-pro-micro-rp2040 = "0.6"
+
+# If you're not going to use a Board Support Package you'll need these:
+# rp2040-hal = { version="0.8", features=["rt", "critical-section-impl"] }
+# rp2040-boot2 = "0.2"
+
+usb-device = { version = "0.2.9", features = ["defmt"] }
+num_enum = { version = "0.6.0", default-features = false }
+embedded-io-async = "0.6.1"
+fatfs = { git = "https://github.com/rafalh/rust-fatfs", version = "0.4", default-features = false, features = [
+    "lfn",
+] }
+# An embedded-hal based driver for ePaper displays from Waveshare formerly published as eink-wave…
+epd-waveshare = { git = "https://github.com/caemor/epd-waveshare" }
+embedded-hal-async = { version = "1.0" }
+ssd1306 = "0.8.4"
+num-traits = { version = "0.2", default-features = false, features = ["libm"] }
+
+portable-atomic = { version = "1.5", features = ["critical-section"] }
+static_cell = "2"
+assign-resources = "0.4.1"
+
+overlay = "1.0"
+overlay_macro = "2.0"
+
+embedded-alloc = "0.6.0"
+
+# cargo build/run
+[profile.dev]
+codegen-units = 1
+debug = 2
+debug-assertions = true
+incremental = false
+opt-level = 3
+overflow-checks = true
+
+[features]
+bbb = []
+scsi = []
+ufi = []
+wifi = []
+si-units = []
+default = ["bbb", "scsi", "wifi", "si-units"]
+
+# cargo build/run --release
+[profile.release]
+codegen-units = 1
+debug = 2
+debug-assertions = false
+incremental = false
+lto = 'fat'
+opt-level = 3
+overflow-checks = false
+
+# do not optimize proc-macro crates = faster builds from scratch
+[profile.dev.build-override]
+codegen-units = 8
+debug = false
+debug-assertions = false
+opt-level = 0
+overflow-checks = false
+
+[profile.release.build-override]
+codegen-units = 8
+debug = false
+debug-assertions = false
+opt-level = 0
+overflow-checks = false
+
+# cargo test
+[profile.test]
+codegen-units = 1
+debug = 2
+debug-assertions = true
+incremental = false
+opt-level = 3
+overflow-checks = true
+
+# cargo test --release
+[profile.bench]
+codegen-units = 1
+debug = 2
+debug-assertions = false
+incremental = false
+lto = 'fat'
+opt-level = 3

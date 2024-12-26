@@ -1,0 +1,18 @@
+[package]
+edition = "2024"
+name = "local_runner"
+version = "0.1.0"
+default-run = "local_runner"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+tracing = { version = "0.1" }
+tracing-subscriber = { version = "0.3" }
+anyhow = { version = "1.0" }
+yansi = { version = "1.0.0-gamma" }
+strum = { version = "0.26.3" }
+strum_macros = { version = "0.26.3" }
+
+utils = { path = "../utils" }
+day1 = { path = "../day1" }
+day2 = { path = "../day2" }
