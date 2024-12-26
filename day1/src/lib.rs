@@ -38,10 +38,7 @@ impl utils::Solution for Solution {
 
     fn update_from_line(&mut self, _id: usize, line: &str) -> Result<(), Self::ParseError> {
         let mut it = line.split_whitespace();
-        let (a, b) = match it
-            .next()
-            .and_then(|v| it.next().and_then(|v2| Some((v, v2))))
-        {
+        let (a, b) = match it.next().and_then(|v| it.next().map(|v2| (v, v2))) {
             Some((a, b)) => (a, b),
             None => panic!("Cannot parse {}", line),
         };

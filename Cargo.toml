@@ -1,5 +1,5 @@
 [workspace]
 resolver = "2"
 
-members = ["xtask", "utils", "template", "local_runner", "day1", "day2"]
+members = ["xtask", "utils", "template", "day1", "day2", "day3"]
 exclude = ["embassy_runner"]

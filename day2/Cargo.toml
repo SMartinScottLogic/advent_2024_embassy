@@ -6,3 +6,12 @@ version = "0.1.0"
 [dependencies]
 log = "0.4.22"
 utils = { path = "../utils" }
+
+[dev-dependencies]
+clap = { version = "4", features = ["derive"] }
+tracing = { version = "0.1" }
+tracing-subscriber = { version = "0.3" }
+anyhow = { version = "1.0" }
+yansi = { version = "1.0.0-gamma" }
+strum = { version = "0.26.3" }
+strum_macros = { version = "0.26.3" }
