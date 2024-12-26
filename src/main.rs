@@ -1,6 +1,13 @@
 #![no_std]
 #![no_main]
+#![feature(lang_items, alloc_error_handler, alloc)]
 
+extern crate alloc;
+extern crate core;
+
+use crate::alloc::boxed::Box;
+use crate::alloc::vec::Vec;
+use core::panic::PanicInfo;
 use panic_probe as _;
 
 use assign_resources::assign_resources;
@@ -18,6 +25,7 @@ use panic_probe as _;
 
 use advent_2024_embassy as lib;
 
+mod aoc;
 mod server;
 mod wifi;
 
