@@ -1,7 +1,7 @@
 use anyhow::Result;
 use clap::Parser;
-use std::{env, io::BufRead, str::FromStr};
 use day3 as lib;
+use std::{env, io::BufRead, str::FromStr};
 use tracing::{Level, debug, error, info, span, trace};
 use tracing_subscriber::fmt::format::FmtSpan;
 use utils::Solution;

@@ -29,8 +29,7 @@ fn setup() -> AnyResult<()> {
 
     // Patch runner
     let runner_filename = PathBuf::from(&entry).join("examples").join("runner.rs");
-    let mut runner_contents = std::fs::read_to_string(&runner_filename)?;
-    let runner_contents = runner_contents.replace("template", &entry);
+    let runner_contents = std::fs::read_to_string(&runner_filename)?.replace("template", &entry);
     std::fs::write(&runner_filename, runner_contents)?;
 
     // Add entry to workspace
