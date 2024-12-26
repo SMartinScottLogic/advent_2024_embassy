@@ -1,13 +1,10 @@
 #![no_std]
 #![no_main]
-#![feature(lang_items, alloc_error_handler, alloc)]
-
+#![feature(alloc_error_handler)]
+#![cfg(all(target_arch = "arm", target_os = "none"))]
 extern crate alloc;
 extern crate core;
 
-use crate::alloc::boxed::Box;
-use crate::alloc::vec::Vec;
-use core::panic::PanicInfo;
 use panic_probe as _;
 
 use assign_resources::assign_resources;
@@ -16,14 +13,10 @@ use defmt_rtt as _;
 use embassy_executor::Spawner;
 use embassy_rp::peripherals;
 use embassy_rp::usb::Driver;
-use embassy_sync::{
-    blocking_mutex::raw::{NoopRawMutex, ThreadModeRawMutex},
-    signal::Signal,
-};
 use embassy_usb::{Builder, Config};
 use panic_probe as _;
 
-use advent_2024_embassy as lib;
+use embassy_runner as lib;
 
 mod aoc;
 mod server;
@@ -56,7 +49,7 @@ async fn main(#[allow(unused_variables)] spawner: Spawner) {
     let r = split_resources!(p);
     let wifi = r.wifi;
     let usb = r.usb.usb;
-    let display = r.display;
+    let _display = r.display;
     let driver = Driver::new(usb, lib::Irqs);
 
     let mut config = Config::new(0xabcd, 0xabcd);
@@ -109,7 +102,7 @@ async fn main(#[allow(unused_variables)] spawner: Spawner) {
     let mut mos_descriptor = [0; 0];
     let mut control_buf = [0; 64];
 
-    let mut builder = Builder::new(
+    let builder = Builder::new(
         driver,
         config,
         &mut device_descriptor,
@@ -119,9 +112,9 @@ async fn main(#[allow(unused_variables)] spawner: Spawner) {
         &mut control_buf,
     );
 
-    let vendor_id = b"CHRISP  "; // per the spec, unused bytes should be a space
-    let product_id = b"100k of trunc   ";
-    let product_revision = b"1.24";
+    let _vendor_id = b"CHRISP  "; // per the spec, unused bytes should be a space
+    let _product_id = b"100k of trunc   ";
+    let _product_revision = b"1.24";
 
     let mut usb = builder.build();
     let usb_fut = usb.run();
