@@ -6,6 +6,17 @@ extern crate core;
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
 use core::num::ParseIntError;
+use nom::IResult;
+use nom::Parser;
+use nom::branch::alt;
+use nom::bytes::complete::tag;
+use nom::character::complete::anychar;
+use nom::character::complete::digit1;
+use nom::combinator::map_res;
+use nom::multi::separated_list1;
+use nom::sequence::delimited;
+use nom::sequence::pair;
+use nom::sequence::terminated;
 
 use log::{debug, info};
 use utils::Solution as _;
@@ -41,41 +52,92 @@ impl utils::Solution for Solution {
     fn analyse(&mut self, _is_full: bool) {}
 
     fn answer_part1(&self, _is_full: bool) -> Result<Self::ResultType, utils::Error> {
-        let regex = Regex::new(r"mul\((?<a>\d{1,3}),(?<b>\d{1,3})\)").unwrap();
         let mut total = 0;
+
         for input in &self.inputs {
-            for capture in regex.captures_iter(input) {
-                let a: ResultType = capture.name("a").unwrap().as_str().parse().unwrap();
-                let b: ResultType = capture.name("b").unwrap().as_str().parse().unwrap();
-                total += a * b;
+            let mut input = input.clone();
+            loop {
+                input = match parse(&input).unwrap() {
+                    (s, Op::Char(c)) => {
+                        debug!("skip char({})", c);
+                        s
+                    }
+                    (s, Op::Mul(a, b)) => {
+                        total += a as ResultType * b as ResultType;
+                        s
+                    }
+                    (s, _) => s,
+                }
+                .to_string();
+                if input.is_empty() {
+                    break;
+                }
             }
         }
         Ok(total)
     }
 
     fn answer_part2(&self, _is_full: bool) -> Result<Self::ResultType, utils::Error> {
-        let regex = Regex::new(r"(?<op>do|don't|mul)\(((?<a>\d{1,3}),(?<b>\d{1,3}))?\)").unwrap();
         let mut total = 0;
         let mut enable = true;
         for input in &self.inputs {
-            for capture in regex.captures_iter(input) {
-                let op = capture.name("op").unwrap().as_str();
-                match op {
-                    "do" => enable = true,
-                    "don't" => enable = false,
-                    "mul" => {
-                        if enable {
-                            let a: ResultType =
-                                capture.name("a").unwrap().as_str().parse().unwrap();
-                            let b: ResultType =
-                                capture.name("b").unwrap().as_str().parse().unwrap();
-                            total += a * b;
-                        }
+            let mut input = input.clone();
+            loop {
+                input = match parse(&input).unwrap() {
+                    (s, Op::Char(c)) => {
+                        debug!("skip char({})", c);
+                        s
                     }
-                    _ => panic!("unknown operator '{op}'"),
+                    (s, Op::Mul(a, b)) => {
+                        if enable {
+                            total += a as ResultType * b as ResultType;
+                        }
+                        s
+                    }
+                    (s, Op::Do) => {
+                        enable = true;
+                        s
+                    }
+                    (s, Op::Dont) => {
+                        enable = false;
+                        s
+                    }
+                }
+                .to_string();
+                if input.is_empty() {
+                    break;
                 }
             }
         }
         Ok(total)
     }
+}
+
+enum Op {
+    Mul(usize, usize),
+    Char(char),
+    Do,
+    Dont,
+}
+
+fn op_mul(input: &str) -> IResult<&str, Op> {
+    map_res(
+        nom::sequence::tuple((tag("mul("), number, tag(","), number, tag(")"))),
+        |(_, a, _, b, _)| Ok::<_, &str>(Op::Mul(a, b)),
+    )(input)
+}
+fn op_do(input: &str) -> IResult<&str, Op> {
+    map_res(tag("do()"), |t| Ok::<_, &str>(Op::Do))(input)
+}
+fn op_dont(input: &str) -> IResult<&str, Op> {
+    map_res(tag("don't()"), |t| Ok::<_, &str>(Op::Dont))(input)
+}
+fn number(input: &str) -> IResult<&str, usize> {
+    map_res(digit1, |digits: &str| digits.parse::<usize>())(input)
+}
+fn onechar(input: &str) -> IResult<&str, Op> {
+    map_res(anychar, |c| Ok::<_, &str>(Op::Char(c)))(input)
+}
+fn parse(input: &str) -> IResult<&str, Op> {
+    alt((op_mul, op_do, op_dont, onechar))(input)
 }
