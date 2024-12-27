@@ -127,10 +127,10 @@ fn op_mul(input: &str) -> IResult<&str, Op> {
     )(input)
 }
 fn op_do(input: &str) -> IResult<&str, Op> {
-    map_res(tag("do()"), |t| Ok::<_, &str>(Op::Do))(input)
+    map_res(tag("do()"), |_| Ok::<_, &str>(Op::Do))(input)
 }
 fn op_dont(input: &str) -> IResult<&str, Op> {
-    map_res(tag("don't()"), |t| Ok::<_, &str>(Op::Dont))(input)
+    map_res(tag("don't()"), |_| Ok::<_, &str>(Op::Dont))(input)
 }
 fn number(input: &str) -> IResult<&str, usize> {
     map_res(digit1, |digits: &str| digits.parse::<usize>())(input)
