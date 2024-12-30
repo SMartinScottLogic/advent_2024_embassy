@@ -8,8 +8,6 @@ log = "0.4.22"
 utils = { path = "../utils" }
 # Safe, fallible, embedded-friendly ordered set/map via a scapegoat tree. Validated against BTreeSet/BTree…
 scapegoat = "2.3.0"
-# `tinyvec` provides 100% safe vec-like data structures.
-tinyvec = "1.8.1"
 
 [dev-dependencies]
 clap = { version = "4", features = ["derive"] }

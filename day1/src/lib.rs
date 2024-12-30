@@ -4,16 +4,16 @@ extern crate core;
 use core::num::ParseIntError;
 
 use log::debug;
-use utils::Solution as _;
 use scapegoat::SgMap;
-use tinyvec::ArrayVec;
+use utils::Solution as _;
+use utils::collections::FixedVec;
 
 pub type ResultType = u64;
 
 #[derive(Debug, Default)]
 pub struct Solution {
-    left: ArrayVec<[ResultType;1024]>,//Vec<ResultType>,
-    right: ArrayVec<[ResultType;1024]>,//Vec<ResultType>,
+    left: FixedVec<ResultType, 1024>,  //Vec<ResultType>,
+    right: FixedVec<ResultType, 1024>, //Vec<ResultType>,
 }
 impl Solution {
     fn distance(a: &ResultType, b: &ResultType) -> ResultType {
@@ -49,19 +49,19 @@ impl utils::Solution for Solution {
         Ok(())
     }
 
-    fn analyse(&mut self, _is_full: bool) {}
+    fn analyse(&mut self, _is_full: bool) {
+        self.left.sort();
+        self.right.sort();
+    }
 
     fn answer_part1(&self, _is_full: bool) -> Result<Self::ResultType, utils::Error> {
-        let mut left = self.left.clone();
-        left.sort();
-        let mut right = self.right.clone();
-        right.sort();
-        for (a, b) in left.iter().zip(right.iter()) {
+        for (a, b) in self.left.iter().zip(self.right.iter()) {
             debug!("sorted {} vs {}", a, b);
         }
-        let answer = left
+        let answer = self
+            .left
             .iter()
-            .zip(right.iter())
+            .zip(self.right.iter())
             .map(|(a, b)| Self::distance(a, b))
             .sum();
         // Implement for problem
@@ -69,11 +69,14 @@ impl utils::Solution for Solution {
     }
 
     fn answer_part2(&self, _is_full: bool) -> Result<Self::ResultType, utils::Error> {
-        let right_count = self.right.iter().fold(SgMap::<_, _, 1000>::new(), |mut acc, value| {
-            let entry: &mut ResultType = acc.entry(*value).or_default();
-            *entry += 1;
-            acc
-        });
+        let right_count = self
+            .right
+            .iter()
+            .fold(SgMap::<_, _, 1000>::new(), |mut acc, value| {
+                let entry: &mut ResultType = acc.entry(*value).or_default();
+                *entry += 1;
+                acc
+            });
 
         let answer = self
             .left

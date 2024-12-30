@@ -6,31 +6,14 @@ use alloc::format;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+use super::Range;
 use alloc::borrow::ToOwned;
 use core::fmt::{Debug, Display};
 use core::hash::Hash;
-use core::ops::RangeInclusive;
 use core::ops::{Add, AddAssign, Sub};
 use core::range::Step;
 
 use log::debug;
-
-#[derive(Debug, Clone)]
-pub struct Range<T> {
-    pub x: RangeInclusive<T>,
-    pub y: RangeInclusive<T>,
-}
-impl<T> Range<T>
-where
-    T: Default + Step,
-{
-    fn new() -> Self {
-        Self {
-            x: T::forward(T::default(), 1)..=T::default(),
-            y: T::forward(T::default(), 1)..=T::default(),
-        }
-    }
-}
 
 #[derive(Debug, Clone)]
 pub struct SparseGrid<T, V>

@@ -18,17 +18,16 @@ use nom::multi::separated_list1;
 use nom::sequence::delimited;
 use nom::sequence::pair;
 use nom::sequence::terminated;
-use tinyvec::Array;
-use tinyvec::ArrayVec;
 
 use log::{debug, info};
 use utils::Solution as _;
+use utils::collections::FixedVec;
 
 pub type ResultType = u64;
 
 #[derive(Default)]
 pub struct Solution {
-    inputs: ArrayVec<[ArrayVec<[u8; 10240]>; 10]>,
+    inputs: FixedVec<FixedVec<u8, 10240>, 10>,
 }
 impl Debug for Solution {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -55,7 +54,7 @@ impl utils::Solution for Solution {
 
     #[allow(unused_variables)]
     fn update_from_line(&mut self, _id: usize, line: &str) -> Result<(), Self::ParseError> {
-        let line = line.bytes().fold(ArrayVec::new(), |mut acc, v| {
+        let line = line.bytes().fold(FixedVec::new(), |mut acc, v| {
             acc.push(v);
             acc
         });
@@ -68,7 +67,7 @@ impl utils::Solution for Solution {
     fn answer_part1(&self, _is_full: bool) -> Result<Self::ResultType, utils::Error> {
         let mut total = 0;
 
-        for input in &self.inputs {
+        for input in self.inputs.iter() {
             let mut input = input.as_ref();
             loop {
                 input = match parse(&input).unwrap() {
@@ -93,7 +92,7 @@ impl utils::Solution for Solution {
     fn answer_part2(&self, _is_full: bool) -> Result<Self::ResultType, utils::Error> {
         let mut total = 0;
         let mut enable = true;
-        for input in &self.inputs {
+        for input in self.inputs.iter() {
             let mut input = input.as_ref();
             loop {
                 input = match parse(&input).unwrap() {

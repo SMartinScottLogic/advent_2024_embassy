@@ -9,8 +9,8 @@ use core::num::ParseIntError;
 
 //use alloc::borrow::ToOwned;
 use log::{debug, info};
-use tinyvec::ArrayVec;
-use utils::grid::SparseGrid;
+use utils::collections::FixedVec;
+use utils::grid::FixedGrid;
 use utils::point::Direction;
 use utils::{Solution as _, point::Point};
 
@@ -18,7 +18,7 @@ pub type ResultType = u64;
 
 #[derive(Debug, Default)]
 pub struct Solution {
-    grid: SparseGrid<char, isize>,
+    grid: FixedGrid<char, 150>,
 }
 
 impl TryFrom<&str> for Solution {
@@ -55,7 +55,7 @@ impl utils::Solution for Solution {
                 if let Some('X') = self.grid.get(&pos) {
                     for delta in Direction::iter() {
                         let pos = Point::new(sx, sy) + delta;
-                        let mut s = ArrayVec::<[char; 4]>::new();
+                        let mut s = FixedVec::<char, 4>::new();
                         s.push('X');
                         if self.walk(pos, &delta, &mut s, "XMAS") {
                             total += 1;
@@ -82,7 +82,7 @@ impl utils::Solution for Solution {
                         (Direction::SW, [Direction::SE, Direction::NW]),
                         (Direction::NW, [Direction::NE, Direction::SW]),
                     ] {
-                        let mut s = ArrayVec::<[char; 4]>::new();
+                        let mut s = FixedVec::<char, 4>::new();
                         s.push('M');
                         if self.walk(start + delta, &delta, &mut s, "MAS") {
                             for next_delta in next_deltas {
@@ -111,7 +111,7 @@ impl Solution {
         &self,
         pos: Point<isize>,
         delta: &Direction,
-        s: &mut ArrayVec<[char; 4]>,
+        s: &mut FixedVec<char, 4>,
         target: &str,
     ) -> bool {
         if let Some(c) = self.grid.get(&pos)
