@@ -5,6 +5,7 @@ extern crate core;
 
 use core::cmp::Ordering;
 use core::num::ParseIntError;
+use tinyvec::ArrayVec;
 
 use log::{debug, info};
 use utils::{Solution as _, collections::FixedVec};
