@@ -1,10 +1,11 @@
 #![no_std]
 #![allow(unused_imports)]
-extern crate alloc;
+//extern crate alloc;
 extern crate core;
 
-use alloc::string::{String, ToString};
-use alloc::vec::Vec;
+use core::fmt::Debug;
+//use alloc::string::{String, ToString};
+//use alloc::vec::Vec;
 use core::num::ParseIntError;
 use nom::IResult;
 use nom::Parser;
@@ -17,15 +18,24 @@ use nom::multi::separated_list1;
 use nom::sequence::delimited;
 use nom::sequence::pair;
 use nom::sequence::terminated;
+use tinyvec::Array;
+use tinyvec::ArrayVec;
 
 use log::{debug, info};
 use utils::Solution as _;
 
 pub type ResultType = u64;
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub struct Solution {
-    inputs: Vec<String>,
+    inputs: ArrayVec<[ArrayVec<[u8; 10240]>; 10]>,
+}
+impl Debug for Solution {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Solution")
+            .field("inputs", &self.inputs.len())
+            .finish()
+    }
 }
 
 impl TryFrom<&str> for Solution {
@@ -45,7 +55,11 @@ impl utils::Solution for Solution {
 
     #[allow(unused_variables)]
     fn update_from_line(&mut self, _id: usize, line: &str) -> Result<(), Self::ParseError> {
-        self.inputs.push(line.to_string());
+        let line = line.bytes().fold(ArrayVec::new(), |mut acc, v| {
+            acc.push(v);
+            acc
+        });
+        self.inputs.push(line);
         Ok(())
     }
 
@@ -55,7 +69,7 @@ impl utils::Solution for Solution {
         let mut total = 0;
 
         for input in &self.inputs {
-            let mut input = input.clone();
+            let mut input = input.as_ref();
             loop {
                 input = match parse(&input).unwrap() {
                     (s, Op::Char(c)) => {
@@ -67,8 +81,7 @@ impl utils::Solution for Solution {
                         s
                     }
                     (s, _) => s,
-                }
-                .to_string();
+                };
                 if input.is_empty() {
                     break;
                 }
@@ -81,7 +94,7 @@ impl utils::Solution for Solution {
         let mut total = 0;
         let mut enable = true;
         for input in &self.inputs {
-            let mut input = input.clone();
+            let mut input = input.as_ref();
             loop {
                 input = match parse(&input).unwrap() {
                     (s, Op::Char(c)) => {
@@ -102,8 +115,7 @@ impl utils::Solution for Solution {
                         enable = false;
                         s
                     }
-                }
-                .to_string();
+                };
                 if input.is_empty() {
                     break;
                 }
@@ -120,24 +132,30 @@ enum Op {
     Dont,
 }
 
-fn op_mul(input: &str) -> IResult<&str, Op> {
+fn op_mul(input: &[u8]) -> IResult<&[u8], Op> {
     map_res(
         nom::sequence::tuple((tag("mul("), number, tag(","), number, tag(")"))),
-        |(_, a, _, b, _)| Ok::<_, &str>(Op::Mul(a, b)),
+        |(_, a, _, b, _)| Ok::<_, &[u8]>(Op::Mul(a, b)),
     )(input)
 }
-fn op_do(input: &str) -> IResult<&str, Op> {
-    map_res(tag("do()"), |_| Ok::<_, &str>(Op::Do))(input)
+fn op_do(input: &[u8]) -> IResult<&[u8], Op> {
+    map_res(tag("do()"), |_| Ok::<_, &[u8]>(Op::Do))(input)
 }
-fn op_dont(input: &str) -> IResult<&str, Op> {
-    map_res(tag("don't()"), |_| Ok::<_, &str>(Op::Dont))(input)
+fn op_dont(input: &[u8]) -> IResult<&[u8], Op> {
+    map_res(tag("don't()"), |_| Ok::<_, &[u8]>(Op::Dont))(input)
 }
-fn number(input: &str) -> IResult<&str, usize> {
-    map_res(digit1, |digits: &str| digits.parse::<usize>())(input)
+fn number(input: &[u8]) -> IResult<&[u8], usize> {
+    map_res(digit1, |digits: &[u8]| {
+        Ok::<usize, &[u8]>(digits.iter().fold(0_usize, |mut acc, v| {
+            acc *= 10;
+            acc += (v - b'0') as usize;
+            acc
+        }))
+    })(input)
 }
-fn onechar(input: &str) -> IResult<&str, Op> {
-    map_res(anychar, |c| Ok::<_, &str>(Op::Char(c)))(input)
+fn onechar(input: &[u8]) -> IResult<&[u8], Op> {
+    map_res(anychar, |c| Ok::<_, &[u8]>(Op::Char(c)))(input)
 }
-fn parse(input: &str) -> IResult<&str, Op> {
+fn parse(input: &[u8]) -> IResult<&[u8], Op> {
     alt((op_mul, op_do, op_dont, onechar))(input)
 }

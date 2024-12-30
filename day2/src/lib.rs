@@ -1,11 +1,11 @@
 #![no_std]
 #![allow(unused_imports)]
-extern crate alloc;
+
 extern crate core;
 
-use alloc::vec::Vec;
 use core::cmp::Ordering;
 use core::num::ParseIntError;
+use tinyvec::ArrayVec;
 
 use log::{debug, info};
 use utils::Solution as _;
@@ -14,7 +14,7 @@ pub type ResultType = u64;
 
 #[derive(Debug, Default)]
 pub struct Solution {
-    reports: Vec<Vec<ResultType>>,
+    reports: ArrayVec<[ArrayVec<[ResultType; 1024]>; 1024]>,
 }
 
 impl TryFrom<&str> for Solution {
@@ -73,7 +73,7 @@ impl utils::Solution for Solution {
 }
 
 impl Solution {
-    fn is_safe_part1(report: &Vec<ResultType>) -> bool {
+    fn is_safe_part1(report: &ArrayVec<[ResultType; 1024]>) -> bool {
         let mut dir = Ordering::Equal;
         let mut last = 0;
         for (i, cur) in report.iter().enumerate() {
@@ -108,7 +108,7 @@ impl Solution {
         true
     }
 
-    fn is_safe_part2(report: &Vec<ResultType>, skip: usize) -> bool {
+    fn is_safe_part2(report: &ArrayVec<[ResultType; 1024]>, skip: usize) -> bool {
         let mut dir = Ordering::Equal;
         let mut last = None;
         for (i, cur) in report.iter().enumerate() {

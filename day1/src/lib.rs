@@ -1,19 +1,19 @@
 #![no_std]
-extern crate alloc;
 extern crate core;
 
 use core::num::ParseIntError;
 
-use alloc::{collections::btree_map::BTreeMap, vec::Vec};
 use log::debug;
 use utils::Solution as _;
+use scapegoat::SgMap;
+use tinyvec::ArrayVec;
 
 pub type ResultType = u64;
 
 #[derive(Debug, Default)]
 pub struct Solution {
-    left: Vec<ResultType>,
-    right: Vec<ResultType>,
+    left: ArrayVec<[ResultType;1024]>,//Vec<ResultType>,
+    right: ArrayVec<[ResultType;1024]>,//Vec<ResultType>,
 }
 impl Solution {
     fn distance(a: &ResultType, b: &ResultType) -> ResultType {
@@ -69,7 +69,7 @@ impl utils::Solution for Solution {
     }
 
     fn answer_part2(&self, _is_full: bool) -> Result<Self::ResultType, utils::Error> {
-        let right_count = self.right.iter().fold(BTreeMap::new(), |mut acc, value| {
+        let right_count = self.right.iter().fold(SgMap::<_, _, 1000>::new(), |mut acc, value| {
             let entry: &mut ResultType = acc.entry(*value).or_default();
             *entry += 1;
             acc
