@@ -119,6 +119,10 @@ where
     pub fn y(&self) -> T {
         self.y
     }
+
+    pub fn ref_mut(&mut self) -> (&mut T, &mut T) {
+        (&mut self.x, &mut self.y)
+    }
 }
 
 impl<T> Mul<T> for Point<T>

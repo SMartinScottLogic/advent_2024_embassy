@@ -83,6 +83,18 @@ impl<T, const C: usize> FixedVec<T, C> {
     }
 }
 
+impl<T: Default, const C: usize> FromIterator<T> for FixedVec<T, C> {
+    fn from_iter<U>(iter: U) -> Self
+    where
+        U: IntoIterator<Item = T>,
+    {
+        let mut c = FixedVec::new();
+        for i in iter {
+            c.push(i);
+        }
+        c
+    }
+}
 pub struct FixedVecIter<'a, T, const C: usize> {
     pos: usize,
     data: &'a FixedVec<T, C>,
