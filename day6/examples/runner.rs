@@ -1,13 +1,13 @@
 use anyhow::Result;
 use clap::Parser;
+use day6 as lib;
 use std::{env, io::BufRead, str::FromStr};
-use template as lib;
 use tracing::{Level, debug, error, info, span, trace};
 use tracing_subscriber::fmt::format::FmtSpan;
 use utils::Solution;
 use yansi::Paint;
 
-const BASENAME: &'static str = "template";
+const BASENAME: &'static str = "day6";
 
 pub fn log_init() {
     // install global collector configured based on RUST_LOG env var.
