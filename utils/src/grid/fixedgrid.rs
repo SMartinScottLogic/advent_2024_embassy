@@ -5,8 +5,6 @@ use core::{
     range::Step,
 };
 
-use log::{debug, info};
-
 use crate::point::Point;
 
 use super::Range;
@@ -182,7 +180,7 @@ where
     }
 
     fn increment_position(&mut self) {
-        let (mut x, mut y) = self.position.ref_mut();
+        let (x, y) = self.position.ref_mut();
 
         *x += 1;
         if (*x).to_usize() >= C {
