@@ -2,7 +2,7 @@
 #![no_main]
 #![feature(alloc_error_handler)]
 #![cfg(all(target_arch = "arm", target_os = "none"))]
-extern crate alloc;
+//extern crate alloc;
 extern crate core;
 
 use panic_probe as _;
