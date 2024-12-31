@@ -53,6 +53,16 @@ where
         }
     }
 }
+impl<T: Clone, const C: usize> FixedGrid<T, C>
+where
+    [(); C * C]:,
+{
+    pub fn filled_with(val: T) -> Self {
+        Self {
+            inner: core::array::from_fn(|_idx| val.clone()),
+        }
+    }
+}
 impl<T, const C: usize> FixedGrid<T, C>
 where
     [(); C * C]:,
@@ -99,8 +109,26 @@ where
         let idx = position.x().to_usize() + position.y().to_usize() * C;
         self.inner.get(idx)
     }
+
+    pub fn get_mut<U>(&mut self, position: &Point<U>) -> Option<&mut T>
+    where
+        U: AddAssign
+            + Add<Output = U>
+            + Default
+            + Hash
+            + Ord
+            + PartialEq
+            + Step
+            + Sub<Output = U>
+            + Eq
+            + Copy
+            + ToUsize,
+    {
+        let idx = position.x().to_usize() + position.y().to_usize() * C;
+        self.inner.get_mut(idx)
+    }
 }
-trait ToUsize {
+pub trait ToUsize {
     fn to_usize(&self) -> usize;
 }
 impl ToUsize for usize {

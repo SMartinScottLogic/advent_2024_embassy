@@ -1,5 +1,7 @@
 #![no_std]
 #![allow(unused_imports)]
+#![feature(generic_const_exprs)]
+
 extern crate core;
 
 use core::num::ParseIntError;
