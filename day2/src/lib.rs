@@ -1,20 +1,19 @@
 #![no_std]
 #![allow(unused_imports)]
-extern crate alloc;
+
 extern crate core;
 
-use alloc::vec::Vec;
 use core::cmp::Ordering;
 use core::num::ParseIntError;
 
 use log::{debug, info};
-use utils::Solution as _;
+use utils::{Solution as _, collections::FixedVec};
 
 pub type ResultType = u64;
 
 #[derive(Debug, Default)]
 pub struct Solution {
-    reports: Vec<Vec<ResultType>>,
+    reports: FixedVec<FixedVec<ResultType, 10>, 1024>,
 }
 
 impl TryFrom<&str> for Solution {
@@ -34,7 +33,13 @@ impl utils::Solution for Solution {
 
     #[allow(unused_variables)]
     fn update_from_line(&mut self, _id: usize, line: &str) -> Result<(), Self::ParseError> {
-        let levels = line.split_whitespace().flat_map(|v| v.parse()).collect();
+        let levels =
+            line.split_whitespace()
+                .flat_map(|v| v.parse())
+                .fold(FixedVec::new(), |mut acc, v| {
+                    acc.push(v);
+                    acc
+                });
         self.reports.push(levels);
         Ok(())
     }
@@ -73,7 +78,7 @@ impl utils::Solution for Solution {
 }
 
 impl Solution {
-    fn is_safe_part1(report: &Vec<ResultType>) -> bool {
+    fn is_safe_part1<const C: usize>(report: &FixedVec<ResultType, C>) -> bool {
         let mut dir = Ordering::Equal;
         let mut last = 0;
         for (i, cur) in report.iter().enumerate() {
@@ -108,7 +113,7 @@ impl Solution {
         true
     }
 
-    fn is_safe_part2(report: &Vec<ResultType>, skip: usize) -> bool {
+    fn is_safe_part2<const C: usize>(report: &FixedVec<ResultType, C>, skip: usize) -> bool {
         let mut dir = Ordering::Equal;
         let mut last = None;
         for (i, cur) in report.iter().enumerate() {

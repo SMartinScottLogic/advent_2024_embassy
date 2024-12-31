@@ -2,14 +2,15 @@
 #![allow(unused_imports)]
 #![feature(let_chains)]
 
-extern crate alloc;
+//extern crate alloc;
 extern crate core;
 
 use core::num::ParseIntError;
 
-use alloc::borrow::ToOwned;
+//use alloc::borrow::ToOwned;
 use log::{debug, info};
-use utils::grid::SparseGrid;
+use utils::collections::FixedVec;
+use utils::grid::FixedGrid;
 use utils::point::Direction;
 use utils::{Solution as _, point::Point};
 
@@ -17,7 +18,7 @@ pub type ResultType = u64;
 
 #[derive(Debug, Default)]
 pub struct Solution {
-    grid: SparseGrid<char, isize>,
+    grid: FixedGrid<char, 150>,
 }
 
 impl TryFrom<&str> for Solution {
@@ -54,7 +55,9 @@ impl utils::Solution for Solution {
                 if let Some('X') = self.grid.get(&pos) {
                     for delta in Direction::iter() {
                         let pos = Point::new(sx, sy) + delta;
-                        if self.walk(pos, &delta, "X", "XMAS") {
+                        let mut s = FixedVec::<char, 4>::new();
+                        s.push('X');
+                        if self.walk(pos, &delta, &mut s, "XMAS") {
                             total += 1;
                             debug!("found {sx}, {sy}, {total}");
                         }
@@ -79,11 +82,16 @@ impl utils::Solution for Solution {
                         (Direction::SW, [Direction::SE, Direction::NW]),
                         (Direction::NW, [Direction::NE, Direction::SW]),
                     ] {
-                        if self.walk(start + delta, &delta, "M", "MAS") {
+                        let mut s = FixedVec::<char, 4>::new();
+                        s.push('M');
+                        if self.walk(start + delta, &delta, &mut s, "MAS") {
                             for next_delta in next_deltas {
                                 let new_start = start + delta - next_delta;
                                 if let Some('M') = self.grid.get(&new_start) {
-                                    if self.walk(new_start + next_delta, &next_delta, "M", "MAS") {
+                                    s.clear();
+                                    s.push('M');
+                                    if self.walk(new_start + next_delta, &next_delta, &mut s, "MAS")
+                                    {
                                         total += 1;
                                     }
                                 }
@@ -99,16 +107,21 @@ impl utils::Solution for Solution {
 }
 
 impl Solution {
-    fn walk(&self, pos: Point<isize>, delta: &Direction, s: &str, target: &str) -> bool {
+    fn walk(
+        &self,
+        pos: Point<isize>,
+        delta: &Direction,
+        s: &mut FixedVec<char, 4>,
+        target: &str,
+    ) -> bool {
         if let Some(c) = self.grid.get(&pos)
             && *c == target.chars().nth(s.len()).unwrap()
         {
             if target.len() == s.len() + 1 {
                 true
             } else {
-                let mut s = s.to_owned();
                 s.push(*c);
-                self.walk(pos + delta, delta, &s, target)
+                self.walk(pos + delta, delta, s, target)
             }
         } else {
             false
