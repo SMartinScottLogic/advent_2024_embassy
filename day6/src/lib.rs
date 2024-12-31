@@ -50,14 +50,9 @@ impl utils::Solution for Solution {
     }
 
     fn analyse(&mut self, _is_full: bool) {
-        for y in 0..150 {
-            for x in 0..150 {
-                let position = Point::new(x as isize, y as isize);
-                if let Some(c) = self.grid.get(&position) {
-                    if *c == '^' {
-                        self.guard_pos = position;
-                    }
-                }
+        for (p, c) in self.grid.iter() {
+            if *c == '^' {
+                self.guard_pos = Point::new(p.0, p.1);
             }
         }
     }
@@ -87,43 +82,25 @@ impl utils::Solution for Solution {
     fn answer_part2(&self, _is_full: bool) -> Result<Self::ResultType, utils::Error> {
         // Implement for problem
         let mut count = 0;
-        let AnalyseResult(_, _visited, first_visited) =
+        let AnalyseResult(_, visited, first_visited) =
             self.analyse(self.guard_pos, Direction::N, None);
         debug!("first visits: {:?}", first_visited);
-        for y in 0..150 {
-            for x in 0..150 {
-                let position = Point::new(x, y);
-                if let Some(direction) = Self::get(&first_visited, position).unwrap() {
-                    debug!("test {:?}", position);
-                    let guard_pos = match direction {
-                        Direction::N => position.south(),
-                        Direction::E => position.west(),
-                        Direction::S => position.north(),
-                        Direction::W => position.east(),
-                        _ => panic!(),
-                    };
-                    if self.analyse(guard_pos, *direction, Some(position)).0 {
-                        count += 1;
-                    }
+        for (i, (position, ..)) in visited.iter().enumerate() {
+            let position = Point::new(position.0 as isize, position.1 as isize);
+            debug!("test {}: {:?}", i, position);
+            if let Some(direction) = Self::get(&first_visited, position).unwrap() {
+                let guard_pos = match direction {
+                    Direction::N => position.south(),
+                    Direction::E => position.west(),
+                    Direction::S => position.north(),
+                    Direction::W => position.east(),
+                    _ => panic!(),
+                };
+                if self.analyse(guard_pos, *direction, Some(position)).0 {
+                    count += 1;
                 }
             }
         }
-        // for (i, (position, ..)) in visited.enumerate_row_major().enumerate() {
-        //     let position = Point::new(position.0 as isize, position.1 as isize);
-        //     debug!(i, ?position, "test");
-        //     if let Some(direction) = Self::get(&first_visited, position).unwrap() {
-        //         let guard_pos = match direction {
-        //             Direction::N => position.south(),
-        //             Direction::E => position.west(),
-        //             Direction::S => position.north(),
-        //             Direction::W => position.east(),
-        //             _ => panic!(),
-        //         };
-        //         if self.analyse(guard_pos, *direction, Some(position)).0 {
-        //             count += 1;
-        //         }
-        //     }
-        // }
         Ok(count)
     }
 }
