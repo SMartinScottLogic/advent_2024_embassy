@@ -1,4 +1,7 @@
-use core::fmt::Debug;
+use core::{
+    fmt::Debug,
+    ops::{Index, IndexMut},
+};
 
 pub struct FixedVec<T, const C: usize> {
     inner: [T; C],
@@ -77,7 +80,24 @@ impl<T, const C: usize> FixedVec<T, C> {
             Some(&self.inner[index])
         }
     }
+}
 
+impl<T, const C: usize> Index<usize> for FixedVec<T, C> {
+    type Output = T;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        assert!(index < self.write_pos);
+        &self.inner[index]
+    }
+}
+impl<T, const C: usize> IndexMut<usize> for FixedVec<T, C> {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        assert!(index < self.write_pos);
+        &mut self.inner[index]
+    }
+}
+
+impl<T, const C: usize> FixedVec<T, C> {
     pub fn iter(&self) -> FixedVecIter<T, C> {
         FixedVecIter { pos: 0, data: self }
     }
