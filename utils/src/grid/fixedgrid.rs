@@ -5,6 +5,8 @@ use core::{
     range::Step,
 };
 
+use log::{debug, info};
+
 use crate::point::Point;
 
 use super::Range;
@@ -88,6 +90,7 @@ where
             + Copy
             + ToUsize,
     {
+        // TODO Add bounds checking
         let idx = position.x().to_usize() + position.y().to_usize() * C;
         self.inner[idx] = Some(value);
     }
@@ -106,6 +109,7 @@ where
             + Copy
             + ToUsize,
     {
+        // TODO Add bounds checking
         let idx = position.x().to_usize() + position.y().to_usize() * C;
         match self.inner.get(idx) {
             Some(v) => v.as_ref(),
@@ -127,6 +131,7 @@ where
             + Copy
             + ToUsize,
     {
+        // TODO Add bounds checking
         let idx = position.x().to_usize() + position.y().to_usize() * C;
         match self.inner.get_mut(idx) {
             Some(v) => v.as_mut(),
@@ -134,6 +139,65 @@ where
         }
     }
 }
+
+impl<T, const C: usize> FixedGrid<T, C>
+where
+    [(); C * C]:,
+    T: Debug,
+{
+    pub fn contains<U>(&self, position: &Point<U>) -> bool
+    where
+        U: AddAssign
+            + Add<Output = U>
+            + Default
+            + Hash
+            + Ord
+            + PartialEq
+            + Step
+            + Sub<Output = U>
+            + Eq
+            + Copy
+            + ToUsize
+            + ToIsize
+            + Debug,
+    {
+        match Self::index(&position) {
+            Some(idx) => {
+                debug!("{:?} -> {} : {:?}", position, idx, self.inner.get(idx));
+                self.inner.get(idx).and_then(|v| v.as_ref()).is_some()
+            }
+            None => false,
+        }
+    }
+
+    fn index<U>(position: &Point<U>) -> Option<usize>
+    where
+        U: AddAssign
+            + Add<Output = U>
+            + Default
+            + Hash
+            + Ord
+            + PartialEq
+            + Step
+            + Sub<Output = U>
+            + Eq
+            + Copy
+            + ToUsize
+            + ToIsize
+            + Debug,
+    {
+        if position.x().to_isize() < 0
+            || position.x().to_usize() >= C
+            || position.y().to_isize() < 0
+            || position.y().to_usize() >= C
+        {
+            None
+        } else {
+            Some(position.x().to_usize() + position.y().to_usize() * C)
+        }
+    }
+}
+
 pub trait ToUsize {
     fn to_usize(&self) -> usize;
 }
@@ -150,6 +214,24 @@ impl ToUsize for isize {
 impl ToUsize for i32 {
     fn to_usize(&self) -> usize {
         *self as usize
+    }
+}
+pub trait ToIsize {
+    fn to_isize(&self) -> isize;
+}
+impl ToIsize for usize {
+    fn to_isize(&self) -> isize {
+        *self as isize
+    }
+}
+impl ToIsize for isize {
+    fn to_isize(&self) -> isize {
+        *self as isize
+    }
+}
+impl ToIsize for i32 {
+    fn to_isize(&self) -> isize {
+        *self as isize
     }
 }
 
