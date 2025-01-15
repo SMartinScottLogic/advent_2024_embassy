@@ -279,6 +279,7 @@ where
             Direction::SW => self.southwest(),
             Direction::W => self.west(),
             Direction::NW => self.northwest(),
+            Direction::None => panic!(),
         }
     }
 }
@@ -309,6 +310,7 @@ where
             Direction::SW => self.southwest(),
             Direction::W => self.west(),
             Direction::NW => self.northwest(),
+            Direction::None => panic!(),
         }
     }
 }
@@ -339,6 +341,7 @@ where
             Direction::SW => self.northeast(),
             Direction::W => self.east(),
             Direction::NW => self.southeast(),
+            Direction::None => panic!(),
         }
     }
 }
@@ -369,6 +372,7 @@ where
             Direction::SW => self.northeast(),
             Direction::W => self.east(),
             Direction::NW => self.southeast(),
+            Direction::None => panic!(),
         }
     }
 }

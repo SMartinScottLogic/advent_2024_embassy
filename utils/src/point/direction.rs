@@ -1,7 +1,9 @@
+use core::default;
+
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter; // 0.17.1
 
-#[derive(Debug, EnumIter, Hash, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, Default, EnumIter, Hash, PartialEq, Eq, Clone, Copy)]
 pub enum Direction {
     N,
     NE,
@@ -11,6 +13,8 @@ pub enum Direction {
     SW,
     W,
     NW,
+    #[default]
+    None,
 }
 impl Direction {
     pub fn iter() -> DirectionIter {

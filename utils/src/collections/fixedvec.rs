@@ -3,6 +3,8 @@ use core::{
     ops::{Index, IndexMut},
 };
 
+use alloc::collections::binary_heap::Iter;
+
 pub struct FixedVec<T, const C: usize> {
     inner: [T; C],
     write_pos: usize,
@@ -128,6 +130,31 @@ impl<'a, T, const C: usize> Iterator for FixedVecIter<'a, T, C> {
         } else {
             self.pos += 1;
             self.data.get(self.pos - 1)
+        }
+    }
+}
+
+pub struct FixedVecIterOwning<T, const C: usize> {
+    pos: usize,
+    data: FixedVec<T, C>,
+}
+impl<T, const C: usize> FixedVec<T, C> {
+    pub fn into_iter(self) -> FixedVecIterOwning<T, C> {
+        FixedVecIterOwning { pos: 0, data: self }
+    }
+}
+impl<T, const C: usize> Iterator for FixedVecIterOwning<T, C>
+where
+    T: Clone,
+{
+    type Item = T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.pos >= self.data.write_pos {
+            None
+        } else {
+            self.pos += 1;
+            self.data.get(self.pos - 1).cloned()
         }
     }
 }
