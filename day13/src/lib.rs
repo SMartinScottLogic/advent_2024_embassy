@@ -11,6 +11,12 @@ use utils::{Solution as _, collections::FixedVec, point::Point};
 
 use nalgebra::{matrix, vector};
 
+use nom::IResult;
+use nom::Parser;
+use nom::bytes::complete::tag;
+use nom::character::complete::digit1;
+use nom::combinator::map_res;
+
 pub type ResultType = u64;
 
 type Button = Point<ResultType>;
@@ -18,7 +24,7 @@ type Prize = Point<ResultType>;
 
 #[derive(Debug, Default)]
 pub struct Solution {
-    machines: FixedVec<(Button, Button, Prize), 5>,
+    machines: FixedVec<(Button, Button, Prize), 500>,
     button_a: Option<Button>,
     button_b: Option<Button>,
 }
@@ -49,23 +55,28 @@ impl utils::Solution for Solution {
             if self.button_a.is_some() {
                 panic!("second Button A");
             }
-            let c = button_regex.captures(rhs).unwrap();
-            let x = c.name("x").unwrap().as_str().parse().unwrap();
-            let y = c.name("y").unwrap().as_str().parse().unwrap();
-            self.button_a = Some(Point::new(x, y));
+            let button = match parse_button(rhs.as_bytes()) {
+                Ok((s, r)) if s.is_empty() => r,
+                Ok((s, r)) => panic!("Unparsed line ending: {:?}", s),
+                Err(e) => panic!("Error: {:?}", e),
+            };
+            self.button_a = Some(button);
         } else if lhs == "Button B" {
             if self.button_b.is_some() {
                 panic!("second Button B");
             }
-            let c = button_regex.captures(rhs).unwrap();
-            let x = c.name("x").unwrap().as_str().parse().unwrap();
-            let y = c.name("y").unwrap().as_str().parse().unwrap();
-            self.button_b = Some(Point::new(x, y));
+            let button = match parse_button(rhs.as_bytes()) {
+                Ok((s, r)) if s.is_empty() => r,
+                Ok((s, r)) => panic!("Unparsed line ending: {:?}", s),
+                Err(e) => panic!("Error: {:?}", e),
+            };
+            self.button_b = Some(button);
         } else if lhs == "Prize" {
-            let c = prize_regex.captures(rhs).unwrap();
-            let x = c.name("x").unwrap().as_str().parse().unwrap();
-            let y = c.name("y").unwrap().as_str().parse().unwrap();
-            let prize = Point::new(x, y);
+            let prize = match parse_prize(rhs.as_bytes()) {
+                Ok((s, r)) if s.is_empty() => r,
+                Ok((s, r)) => panic!("Unparsed line ending: {:?}", s),
+                Err(e) => panic!("Error: {:?}", e),
+            };
             self.machines
                 .push((self.button_a.unwrap(), self.button_b.unwrap(), prize));
             self.button_a = None;
@@ -121,9 +132,10 @@ fn min_cost_part1(
 
     for a_presses in 0..=a_left {
         let a_move = location + *button_a * a_presses;
-        if a_move.x() > prize.x() && a_move.y() > prize.y() {
+        if a_move.x() > prize.x() || a_move.y() > prize.y() {
             continue;
         }
+        debug!("prize:{:?}, a_move:{:?}", prize, a_move);
         let remaining = *prize - a_move;
         if remaining.x() % button_b.x() == 0 && remaining.y() % button_b.y() == 0 {
             let x_presses = remaining.x() / button_b.x();
@@ -197,4 +209,28 @@ fn min_cost_part2((button_a, button_b, prize): &(Button, Button, Prize)) -> Opti
     //     }
     //     _ => None,
     // }
+}
+
+fn number(input: &[u8]) -> IResult<&[u8], u64> {
+    map_res(digit1, |digits: &[u8]| {
+        Ok::<u64, &[u8]>(digits.iter().fold(0_u64, |mut acc, v| {
+            acc *= 10;
+            acc += (v - b'0') as u64;
+            acc
+        }))
+    })(input)
+}
+
+fn parse_button(input: &[u8]) -> IResult<&[u8], Button> {
+    map_res(
+        nom::sequence::tuple((tag("X+"), number, tag(", "), tag("Y+"), number)),
+        |(_, x, _, _, y)| Ok::<_, &[u8]>(Button::new(x, y)),
+    )(input)
+}
+
+fn parse_prize(input: &[u8]) -> IResult<&[u8], Prize> {
+    map_res(
+        nom::sequence::tuple((tag("X="), number, tag(", "), tag("Y="), number)),
+        |(_, x, _, _, y)| Ok::<_, &[u8]>(Prize::new(x, y)),
+    )(input)
 }
