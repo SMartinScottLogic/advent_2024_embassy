@@ -17,18 +17,18 @@ impl TryFrom<&str> for Solution {
         todo!()
     }
 }
-impl utils::Solution for Solution {
-    type Result = Result<ResultType, Infallible>;
+// impl utils::Solution for Solution {
+//     type Result = Result<ResultType, Infallible>;
 
-    fn analyse(&mut self, _is_full: bool) {}
+//     fn analyse(&mut self, _is_full: bool) {}
 
-    fn answer_part1(&self, _is_full: bool) -> Self::Result {
-        // Implement for problem
-        Ok(0)
-    }
+//     fn answer_part1(&self, _is_full: bool) -> Self::Result {
+//         // Implement for problem
+//         Ok(0)
+//     }
 
-    fn answer_part2(&self, _is_full: bool) -> Self::Result {
-        // Implement for problem
-        Ok(0)
-    }
-}
+//     fn answer_part2(&self, _is_full: bool) -> Self::Result {
+//         // Implement for problem
+//         Ok(0)
+//     }
+// }
