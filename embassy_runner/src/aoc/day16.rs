@@ -1,4 +1,6 @@
+use core::hash::Hash;
 use defmt::{debug, error, info};
+use num_traits::Zero;
 
 use nom::bytes::complete::tag;
 use nom::bytes::complete::take_while;
@@ -14,7 +16,7 @@ pub type ResultType = u64;
 const FULL: &'static [u8] = include_bytes!("../../../input/day16.full");
 const SAMPLE: &'static [u8] = include_bytes!("../../../input/day16.sample");
 
-#[derive(Default, Clone, PartialEq)]
+#[derive(Default, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum Direction {
     N,
     NE,
@@ -85,7 +87,7 @@ fn run(label: &'static str, data: &[u8]) {
         }
     }
     info!("{} start @ {}, end @ {}", label, start, end);
-    let answer = if let Some((_route, cost)) = pathfinding::directed::astar::astar(
+    let answer = if let Some((_route, cost)) = astar::<_, _, _, _, _, _, 1500>(
         &start,
         |p| successors(&grid, p.0, p.1, p.2),
         |p| heuristic(p.0, p.1, p.2, &end),
@@ -96,7 +98,24 @@ fn run(label: &'static str, data: &[u8]) {
         0
     };
     // Implement for problem
-    info!("Part1 answer: {}", answer);
+    info!("{} part1 answer: {}", label, answer);
+}
+
+fn astar<N, Z, FN, IN, FH, FS, const C: usize>(
+    start: &N,
+    mut successors: FN,
+    mut heuristic: FH,
+    mut success: FS,
+) -> Option<(FixedVec<N, C>, Z)>
+where
+    N: Eq + Hash + Clone,
+    Z: Zero + Ord + Copy,
+    FN: FnMut(&N) -> IN,
+    IN: IntoIterator<Item = (N, Z)>,
+    FH: FnMut(&N) -> Z,
+    FS: FnMut(&N) -> bool,
+{
+    todo!()
 }
 
 fn success(_facing: Direction, x: usize, y: usize, end: &(usize, usize)) -> bool {
