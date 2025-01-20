@@ -33,7 +33,7 @@
                     "rttEnabled": true,
                     "options": {
                         "env": {
-                            "DEFMT_LOG": "debug"
+                            "DEFMT_LOG": "info"
                         }
                     },
                 }
