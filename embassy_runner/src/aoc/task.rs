@@ -1,4 +1,4 @@
-use super::day7::{run_sample, run_full};
+use super::day16::{run_sample, run_full};
 
 pub struct AocTask {
 
