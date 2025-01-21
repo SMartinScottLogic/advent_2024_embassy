@@ -1,9 +1,0 @@
-[package]
-name = "utils"
-version = "0.1.0"
-edition = "2024"
-
-[dependencies]
-strum = { version = "0.26.3" }
-strum_macros = { version = "0.26.3" }
-log = "0.4.22"
