@@ -1,10 +1,5 @@
 use defmt::{debug, info};
 
-use nom::branch::alt;
-use nom::bytes::complete::tag;
-use nom::bytes::complete::take;
-use nom::bytes::complete::{take_while, take_while1};
-use nom::character::complete::digit1;
 use nom::combinator::iterator;
 use nom::combinator::map_res;
 use nom::IResult;
