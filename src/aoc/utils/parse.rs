@@ -47,7 +47,7 @@ where
 }
 
 pub fn newline(input: &[u8]) -> IResult<&[u8], &[u8]> {
-    take_while(|c| c == b'\n' || c == b'\r')(input)
+    take_while1(|c| c == b'\n' || c == b'\r')(input)
 }
 
 pub fn non_newline(input: &[u8]) -> IResult<&[u8], &[u8]> {
@@ -55,5 +55,5 @@ pub fn non_newline(input: &[u8]) -> IResult<&[u8], &[u8]> {
 }
 
 pub fn whitespace(input: &[u8]) -> IResult<&[u8], &[u8]> {
-    take_while(|c| c == b' ' || c == b'\t')(input)
+    take_while1(|c| c == b' ' || c == b'\t')(input)
 }

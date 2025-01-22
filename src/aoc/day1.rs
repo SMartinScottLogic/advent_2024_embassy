@@ -7,7 +7,7 @@ use crate::aoc::utils::FixedVec;
 
 use super::utils::parse::{integer, newline, whitespace};
 
-pub type ResultType = u64;
+type ResultType = u64;
 
 const FULL: &[u8] = include_bytes!("../../input/day1.full");
 const SAMPLE: &[u8] = include_bytes!("../../input/day1.sample");

@@ -10,7 +10,7 @@ use crate::aoc::utils::FixedVec;
 use super::utils::parse::list_number;
 use super::utils::parse::newline;
 
-pub type ResultType = u64;
+type ResultType = u64;
 
 const FULL: &[u8] = include_bytes!("../../input/day2.full");
 const SAMPLE: &[u8] = include_bytes!("../../input/day2.sample");
