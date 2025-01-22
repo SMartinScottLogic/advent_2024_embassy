@@ -6,5 +6,5 @@ mod day7;
 mod task;
 mod utils;
 
-pub use day7::Solution;
+pub use day4::Solution;
 pub use task::AocTask as Task;

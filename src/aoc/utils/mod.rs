@@ -1,3 +1,4 @@
+pub mod direction;
 mod fixedvec;
 pub mod parse;
 mod solution;
