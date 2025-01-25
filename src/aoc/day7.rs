@@ -31,13 +31,14 @@ impl super::utils::Solution for Solution {
 }
 
 fn run(label: &'static str, data: &[u8]) {
+    info!("{} start parsing", label);
     let mut data = data;
     let mut row = 0;
     let mut total1 = 0;
     let mut total2 = 0;
     loop {
         if let Ok((r, (answer, values))) = parse(data) {
-            debug!("{}: {} -> {} values", row, answer, values.len());
+            info!("{}: {} -> {} values", row, answer, values.len());
             if can_be_true(&answer, values.as_ref(), false) {
                 total1 += answer;
             }
@@ -60,12 +61,7 @@ fn run(label: &'static str, data: &[u8]) {
 
 fn parse(input: &[u8]) -> IResult<&[u8], (ResultType, FixedVec<ResultType, 50>)> {
     map_res(
-        nom::sequence::tuple((
-            integer::<ResultType>,
-            tag(":"),
-            list_number::<ResultType, 50>,
-            newline,
-        )),
+        nom::sequence::tuple((integer, tag(":"), list_number, newline)),
         |(answer, _, params, _)| Ok::<_, &[u8]>((answer, params)),
     )(input)
 }
