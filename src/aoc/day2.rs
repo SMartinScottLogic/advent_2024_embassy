@@ -1,14 +1,18 @@
 use core::cmp::Ordering;
 
-use defmt::{debug, info};
+use defmt::{debug, error, info};
 
-use nom::combinator::map_res;
-use nom::IResult;
+use embassy_rp::pac::common::R;
+use nom::bytes::complete::tag;
+use nom::combinator::opt;
+use nom::multi::fold_many1;
+use nom::sequence::tuple;
+use nom::{branch::alt, combinator::map_res};
+use nom::{IResult, InputIter, InputLength, InputTake};
 
 use crate::aoc::utils::FixedVec;
 
-use super::utils::parse::list_number;
-use super::utils::parse::newline;
+use super::utils::parse::{integer, newline};
 
 type ResultType = u64;
 
@@ -36,7 +40,7 @@ fn run(label: &'static str, data: &[u8]) {
     let mut step1_answer = 0;
     let mut step2_answer = 0;
     for (row, line) in (&mut it).enumerate() {
-        debug!("{} {}: {}", label, row, line.len());
+        info!("{} {}: {}", label, row, line.len());
         if is_safe_part1(line.as_ref()) {
             step1_answer += 1;
             step2_answer += 1;
@@ -44,12 +48,17 @@ fn run(label: &'static str, data: &[u8]) {
             step2_answer += 1;
         }
     }
-    if it.finish().is_err() {
-        info!("{} error", label);
-    } else {
-        info!("{} part1 answer: {}", label, step1_answer);
-        info!("{} part2 answer: {}", label, step2_answer);
+    match it.finish() {
+        Ok((r, _)) => {
+            if !r.is_empty() {
+                panic!("{} residual size: {} of {}", label, r.len(), data.len())
+            }
+        }
+        Err(_e) => error!("{} error", label),
     }
+
+    info!("{} part1 answer: {}", label, step1_answer);
+    info!("{} part2 answer: {}", label, step2_answer);
 }
 
 fn is_safe_part1(report: &[ResultType]) -> bool {
@@ -120,6 +129,26 @@ fn is_safe_part2(report: &[ResultType], skip: usize) -> bool {
         last = Some(*cur);
     }
     true
+}
+
+fn list_number<RT, const C: usize>(input: &[u8]) -> IResult<&[u8], FixedVec<RT, C>>
+where
+    RT: core::convert::TryFrom<i32>
+        + core::convert::TryFrom<u8>
+        + core::ops::MulAssign<RT>
+        + core::ops::AddAssign
+        + core::default::Default,
+    <RT as core::convert::TryFrom<u8>>::Error: core::fmt::Debug,
+    <RT as core::convert::TryFrom<i32>>::Error: core::fmt::Debug,
+{
+    fold_many1(
+        tuple((integer::<RT>, opt(tag(b" ")))),
+        FixedVec::new,
+        |mut acc: FixedVec<RT, C>, item| {
+            acc.push(item.0);
+            acc
+        },
+    )(input)
 }
 
 fn parse_line(input: &[u8]) -> IResult<&[u8], FixedVec<ResultType, 50>> {
