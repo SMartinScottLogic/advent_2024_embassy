@@ -11,5 +11,5 @@ mod day9;
 mod task;
 mod utils;
 
-pub use day6::Solution;
+pub use day10::Solution;
 pub use task::AocTask as Task;
