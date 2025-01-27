@@ -1,11 +1,10 @@
+use arrayvec::ArrayVec;
 use defmt::{error, info};
 
 use nom::combinator::map_res;
 use nom::combinator::{iterator, opt};
 use nom::IResult;
 use scapegoat::SgSet;
-
-use crate::aoc::utils::FixedVec;
 
 use super::utils::parse::newline;
 use super::utils::parse::non_newline;
@@ -30,7 +29,7 @@ impl super::utils::Solution for Solution {
 
 fn run(label: &'static str, data: &[u8]) {
     info!("{} start parsing", label);
-    let mut grid = FixedVec::<&[u8], 200>::new();
+    let mut grid = ArrayVec::<&[u8], 200>::new();
     let mut it = iterator(data, grid_line);
     for line in &mut it {
         grid.push(line);
@@ -62,7 +61,7 @@ fn grid_line(input: &[u8]) -> IResult<&[u8], &[u8]> {
     )(input)
 }
 
-fn analyse_part1<const C: usize>(grid: &FixedVec<&[u8], C>) -> usize {
+fn analyse_part1<const C: usize>(grid: &ArrayVec<&[u8], C>) -> usize {
     let mut antinodes = SgSet::<(isize, isize), 1024>::new();
     let min_y = 0_isize;
     let max_y = (grid.len() - 1) as isize;
@@ -114,7 +113,7 @@ fn analyse_part1<const C: usize>(grid: &FixedVec<&[u8], C>) -> usize {
     antinodes.len()
 }
 
-fn analyse_part2<const C: usize>(grid: &FixedVec<&[u8], C>) -> usize {
+fn analyse_part2<const C: usize>(grid: &ArrayVec<&[u8], C>) -> usize {
     let mut antinodes = SgSet::<(isize, isize), 1024>::new();
     let min_y = 0_isize;
     let max_y = (grid.len() - 1) as isize;

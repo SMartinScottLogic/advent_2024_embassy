@@ -1,5 +1,6 @@
 use core::cmp::Ordering;
 
+use arrayvec::ArrayVec;
 use defmt::{debug, error, info};
 use nom::{
     branch::alt,
@@ -9,8 +10,6 @@ use nom::{
     sequence::tuple,
     IResult,
 };
-
-use crate::aoc::utils::FixedVec;
 
 use super::utils::parse::{integer, newline};
 
@@ -37,8 +36,8 @@ impl super::utils::Solution for Solution {
 fn run(label: &'static str, data: &[u8]) {
     info!("{} start parsing", label);
 
-    let mut ordering = FixedVec::<_, 1200>::new();
-    let mut updates = FixedVec::<_, 256>::new();
+    let mut ordering = ArrayVec::<_, 1200>::new();
+    let mut updates = ArrayVec::<_, 256>::new();
     let mut it = iterator(data, parse);
     for (row, step) in (&mut it).enumerate() {
         match step {
@@ -81,7 +80,7 @@ fn run(label: &'static str, data: &[u8]) {
         let correct = is_correct(update.as_ref(), ordering.as_ref());
         if !correct {
             let mut fixed = update.clone();
-            fix(fixed.as_mut_ref(), ordering.as_ref());
+            fix(fixed.as_mut(), ordering.as_ref());
             let mid = fixed.get(update.len() / 2).unwrap();
             part2_answer += mid;
         }
@@ -114,7 +113,7 @@ fn fix(arr: &mut [ResultType], rules: &[(ResultType, ResultType)]) {
 
 enum Step {
     Ordering(ResultType, ResultType),
-    Update(FixedVec<ResultType, 32>),
+    Update(ArrayVec<ResultType, 32>),
 }
 
 fn ordering(input: &[u8]) -> IResult<&[u8], Step> {
@@ -124,7 +123,7 @@ fn ordering(input: &[u8]) -> IResult<&[u8], Step> {
     )(input)
 }
 
-fn list_number<RT, const C: usize>(input: &[u8]) -> IResult<&[u8], FixedVec<RT, C>>
+fn list_number<RT, const C: usize>(input: &[u8]) -> IResult<&[u8], ArrayVec<RT, C>>
 where
     RT: core::convert::TryFrom<i32>
         + core::convert::TryFrom<u8>
@@ -136,8 +135,8 @@ where
 {
     fold_many1(
         tuple((integer::<RT>, tag(b","))),
-        FixedVec::new,
-        |mut acc: FixedVec<RT, C>, item| {
+        ArrayVec::new,
+        |mut acc: ArrayVec<RT, C>, item| {
             acc.push(item.0);
             acc
         },
