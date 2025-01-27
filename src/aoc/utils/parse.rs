@@ -1,3 +1,4 @@
+use arrayvec::ArrayVec;
 use nom::bytes::complete::tag;
 use nom::bytes::complete::take_while;
 use nom::bytes::complete::take_while1;
@@ -5,8 +6,6 @@ use nom::character::complete::digit1;
 use nom::combinator::map_res;
 use nom::multi::fold_many1;
 use nom::IResult;
-
-use super::FixedVec;
 
 pub fn integer<RT>(input: &[u8]) -> IResult<&[u8], RT>
 where
@@ -26,7 +25,7 @@ where
     })(input)
 }
 
-pub fn list_number<RT, const C: usize>(input: &[u8]) -> IResult<&[u8], FixedVec<RT, C>>
+pub fn list_number<RT, const C: usize>(input: &[u8]) -> IResult<&[u8], ArrayVec<RT, C>>
 where
     RT: core::convert::TryFrom<i32>
         + core::convert::TryFrom<u8>
@@ -38,8 +37,8 @@ where
 {
     fold_many1(
         nom::sequence::tuple((tag(" "), integer::<RT>)),
-        FixedVec::new,
-        |mut acc: FixedVec<RT, C>, item| {
+        ArrayVec::new,
+        |mut acc: ArrayVec<RT, C>, item| {
             acc.push(item.1);
             acc
         },
