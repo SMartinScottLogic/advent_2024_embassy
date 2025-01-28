@@ -1,9 +1,8 @@
+use arrayvec::ArrayVec;
 use defmt::{debug, info};
 
 use nom::{combinator::map_res, IResult};
 use scapegoat::SgMap;
-
-use crate::aoc::utils::FixedVec;
 
 use super::utils::parse::{integer, newline, whitespace};
 
@@ -29,8 +28,8 @@ impl super::utils::Solution for Solution {
 
 fn run(label: &'static str, data: &[u8]) {
     info!("{} start parsing", label);
-    let mut left: FixedVec<_, 1024> = FixedVec::new();
-    let mut right: FixedVec<_, 1024> = FixedVec::new();
+    let mut left: ArrayVec<_, 1024> = ArrayVec::new();
+    let mut right: ArrayVec<_, 1024> = ArrayVec::new();
 
     let mut it = nom::combinator::iterator(data, parse_line);
     for (a, b) in &mut it {
@@ -42,8 +41,8 @@ fn run(label: &'static str, data: &[u8]) {
         info!("{} error", label);
     } else {
         info!("{} processing", label);
-        left.as_mut_ref().sort_unstable();
-        right.as_mut_ref().sort_unstable();
+        left.as_mut().sort_unstable();
+        right.as_mut().sort_unstable();
 
         let answer: ResultType = left
             .iter()

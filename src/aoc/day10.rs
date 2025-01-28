@@ -1,11 +1,10 @@
+use arrayvec::ArrayVec;
 use defmt::{error, info};
 
 use nom::combinator::map_res;
 use nom::combinator::{iterator, opt};
 use nom::IResult;
 use scapegoat::SgSet;
-
-use crate::aoc::utils::FixedVec;
 
 use super::utils::parse::newline;
 use super::utils::parse::non_newline;
@@ -32,7 +31,7 @@ impl super::utils::Solution for Solution {
 
 fn run(label: &'static str, data: &[u8]) {
     info!("{} start parsing", label);
-    let mut grid = FixedVec::<&[u8], 64>::new();
+    let mut grid = ArrayVec::<&[u8], 64>::new();
     let mut it = iterator(data, grid_line);
     for line in &mut it {
         grid.push(line);
@@ -79,7 +78,7 @@ fn grid_line(input: &[u8]) -> IResult<&[u8], &[u8]> {
 }
 
 fn get_reachable<const C: usize, const N: usize>(
-    grid: &FixedVec<&[u8], C>,
+    grid: &ArrayVec<&[u8], C>,
     x: isize,
     y: isize,
     max_x: isize,
@@ -110,7 +109,7 @@ fn get_reachable<const C: usize, const N: usize>(
 }
 
 fn get<'a, const C: usize>(
-    grid: &'a FixedVec<&[u8], C>,
+    grid: &'a ArrayVec<&[u8], C>,
     x: isize,
     y: isize,
     max_x: isize,

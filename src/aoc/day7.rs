@@ -1,10 +1,9 @@
+use arrayvec::ArrayVec;
 use defmt::{debug, error, info};
 
 use nom::bytes::complete::tag;
 use nom::combinator::map_res;
 use nom::IResult;
-
-use crate::aoc::utils::FixedVec;
 
 use super::utils::parse::integer;
 use super::utils::parse::list_number;
@@ -59,7 +58,7 @@ fn run(label: &'static str, data: &[u8]) {
     info!("{} part2 answer: {}", label, total2);
 }
 
-fn parse(input: &[u8]) -> IResult<&[u8], (ResultType, FixedVec<ResultType, 50>)> {
+fn parse(input: &[u8]) -> IResult<&[u8], (ResultType, ArrayVec<ResultType, 50>)> {
     map_res(
         nom::sequence::tuple((integer, tag(":"), list_number, newline)),
         |(answer, _, params, _)| Ok::<_, &[u8]>((answer, params)),
@@ -71,8 +70,8 @@ fn can_be_true(answer: &ResultType, values: &[ResultType], is_part2: bool) -> bo
         .iter()
         .map(|_| '*')
         .skip(1)
-        .collect::<FixedVec<_, 50>>();
-    let operators = operators.as_mut_ref();
+        .collect::<ArrayVec<_, 50>>();
+    let operators = operators.as_mut();
     test_all_up_to(operators.len() - 1, answer, values, operators, is_part2)
 }
 
