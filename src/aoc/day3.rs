@@ -20,11 +20,11 @@ impl super::utils::Solution for Solution {
         Self {}
     }
 
-    fn run_sample(&self) {
+    fn run_sample(&mut self) {
         run("sample", SAMPLE)
     }
 
-    fn run_full(&self) {
+    fn run_full(&mut self) {
         run("full", FULL)
     }
 }

@@ -1,6 +1,5 @@
+use arrayvec::ArrayVec;
 use defmt::info;
-
-use crate::aoc::utils::FixedVec;
 
 type ResultType = u64;
 
@@ -13,11 +12,11 @@ impl super::utils::Solution for Solution {
         Self {}
     }
 
-    fn run_sample(&self) {
+    fn run_sample(&mut self) {
         run("sample", SAMPLE)
     }
 
-    fn run_full(&self) {
+    fn run_full(&mut self) {
         run("full", FULL)
     }
 }
@@ -78,8 +77,8 @@ enum Block {
     FileBlock(usize),
 }
 
-fn diskmap(map: &[u8]) -> FixedVec<Block, 200000> {
-    let mut blocks = FixedVec::new();
+fn diskmap(map: &[u8]) -> ArrayVec<Block, 200000> {
+    let mut blocks = ArrayVec::new();
     for (id, c) in map.iter().enumerate() {
         let c = *c - b'0';
         let s = if id % 2 == 0 {

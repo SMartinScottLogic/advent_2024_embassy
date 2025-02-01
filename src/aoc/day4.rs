@@ -1,10 +1,9 @@
+use arrayvec::ArrayVec;
 use defmt::{debug, info};
 
 use nom::combinator::iterator;
 use nom::combinator::map_res;
 use nom::IResult;
-
-use crate::aoc::utils::FixedVec;
 
 use super::utils::parse::{newline, non_newline};
 
@@ -17,11 +16,11 @@ impl super::utils::Solution for Solution {
         Self {}
     }
 
-    fn run_sample(&self) {
+    fn run_sample(&mut self) {
         run("sample", SAMPLE)
     }
 
-    fn run_full(&self) {
+    fn run_full(&mut self) {
         run("full", FULL)
     }
 }
@@ -29,7 +28,7 @@ impl super::utils::Solution for Solution {
 fn run(label: &'static str, data: &[u8]) {
     info!("{} start parsing", label);
 
-    let mut grid = FixedVec::<&[u8], 200>::new();
+    let mut grid = ArrayVec::<&[u8], 200>::new();
     let mut it = iterator(data, grid_line);
     for line in &mut it {
         grid.push(line);
@@ -91,7 +90,7 @@ fn run(label: &'static str, data: &[u8]) {
 }
 
 fn walk(
-    grid: &FixedVec<&[u8], 200>,
+    grid: &ArrayVec<&[u8], 200>,
     sx: isize,
     sy: isize,
     dx: isize,

@@ -1,16 +1,14 @@
 use core::cmp::Ordering;
 
-use defmt::{debug, error, info};
+use arrayvec::ArrayVec;
+use defmt::{error, info};
 
-use embassy_rp::pac::common::R;
 use nom::bytes::complete::tag;
+use nom::combinator::map_res;
 use nom::combinator::opt;
 use nom::multi::fold_many1;
 use nom::sequence::tuple;
-use nom::{branch::alt, combinator::map_res};
-use nom::{IResult, InputIter, InputLength, InputTake};
-
-use crate::aoc::utils::FixedVec;
+use nom::IResult;
 
 use super::utils::parse::{integer, newline};
 
@@ -25,11 +23,11 @@ impl super::utils::Solution for Solution {
         Self {}
     }
 
-    fn run_sample(&self) {
+    fn run_sample(&mut self) {
         run("sample", SAMPLE)
     }
 
-    fn run_full(&self) {
+    fn run_full(&mut self) {
         run("full", FULL)
     }
 }
@@ -131,7 +129,7 @@ fn is_safe_part2(report: &[ResultType], skip: usize) -> bool {
     true
 }
 
-fn list_number<RT, const C: usize>(input: &[u8]) -> IResult<&[u8], FixedVec<RT, C>>
+fn list_number<RT, const C: usize>(input: &[u8]) -> IResult<&[u8], ArrayVec<RT, C>>
 where
     RT: core::convert::TryFrom<i32>
         + core::convert::TryFrom<u8>
@@ -143,15 +141,15 @@ where
 {
     fold_many1(
         tuple((integer::<RT>, opt(tag(b" ")))),
-        FixedVec::new,
-        |mut acc: FixedVec<RT, C>, item| {
+        ArrayVec::new,
+        |mut acc: ArrayVec<RT, C>, item| {
             acc.push(item.0);
             acc
         },
     )(input)
 }
 
-fn parse_line(input: &[u8]) -> IResult<&[u8], FixedVec<ResultType, 50>> {
+fn parse_line(input: &[u8]) -> IResult<&[u8], ArrayVec<ResultType, 50>> {
     map_res(
         nom::sequence::tuple((list_number, newline)),
         |(answer, _)| Ok::<_, &[u8]>(answer),
