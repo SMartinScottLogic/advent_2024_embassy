@@ -18,11 +18,11 @@ impl super::utils::Solution for Solution {
         Self {}
     }
 
-    fn run_sample(&self) {
+    fn run_sample(&mut self) {
         run("sample", SAMPLE)
     }
 
-    fn run_full(&self) {
+    fn run_full(&mut self) {
         run("full", FULL)
     }
 }
@@ -66,7 +66,7 @@ fn analyse_part1<const C: usize>(grid: &ArrayVec<&[u8], C>) -> usize {
     let min_y = 0_isize;
     let max_y = (grid.len() - 1) as isize;
     let min_x = 0_isize;
-    let max_x = (grid.get(0).unwrap().len() - 1) as isize;
+    let max_x = (grid.first().unwrap().len() - 1) as isize;
 
     for (p1_y, p1_r) in grid.iter().enumerate() {
         for (p1_x, p1_c) in p1_r.iter().enumerate() {
@@ -118,7 +118,7 @@ fn analyse_part2<const C: usize>(grid: &ArrayVec<&[u8], C>) -> usize {
     let min_y = 0_isize;
     let max_y = (grid.len() - 1) as isize;
     let min_x = 0_isize;
-    let max_x = (grid.get(0).unwrap().len() - 1) as isize;
+    let max_x = (grid.first().unwrap().len() - 1) as isize;
 
     for (p1_y, p1_r) in grid.iter().enumerate() {
         for (p1_x, p1_c) in p1_r.iter().enumerate() {

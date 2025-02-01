@@ -20,11 +20,11 @@ impl super::utils::Solution for Solution {
         Self {}
     }
 
-    fn run_sample(&self) {
+    fn run_sample(&mut self) {
         run("sample", SAMPLE)
     }
 
-    fn run_full(&self) {
+    fn run_full(&mut self) {
         run("full", FULL)
     }
 }
@@ -53,7 +53,7 @@ fn run(label: &'static str, data: &[u8]) {
     let mut step1_answer = 0;
     let mut step2_answer = 0;
     let max_y = (grid.len() - 1) as isize;
-    let max_x = (grid.get(0).unwrap().len() - 1) as isize;
+    let max_x = (grid.first().unwrap().len() - 1) as isize;
 
     for (y, r) in grid.iter().enumerate() {
         for (x, c) in r.iter().enumerate() {

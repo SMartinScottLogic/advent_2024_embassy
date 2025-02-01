@@ -1,15 +1,14 @@
 use core::cmp::Ordering;
 
 use arrayvec::ArrayVec;
-use defmt::{debug, error, info};
+use defmt::{error, info};
 
-use embassy_rp::pac::common::R;
 use nom::bytes::complete::tag;
+use nom::combinator::map_res;
 use nom::combinator::opt;
 use nom::multi::fold_many1;
 use nom::sequence::tuple;
-use nom::{branch::alt, combinator::map_res};
-use nom::{IResult, InputIter, InputLength, InputTake};
+use nom::IResult;
 
 use super::utils::parse::{integer, newline};
 
@@ -24,11 +23,11 @@ impl super::utils::Solution for Solution {
         Self {}
     }
 
-    fn run_sample(&self) {
+    fn run_sample(&mut self) {
         run("sample", SAMPLE)
     }
 
-    fn run_full(&self) {
+    fn run_full(&mut self) {
         run("full", FULL)
     }
 }
