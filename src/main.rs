@@ -2,71 +2,81 @@
 #![no_main]
 #![feature(alloc_error_handler)]
 #![cfg(all(target_arch = "arm", target_os = "none"))]
-//extern crate alloc;
+
 extern crate core;
 
-use panic_probe as _;
-
-use assign_resources::assign_resources;
-use defmt::info;
+use defmt::{info, unwrap};
 use defmt_rtt as _;
 use embassy_executor::Spawner;
-use embassy_rp::peripherals;
-use embassy_rp::usb::Driver;
-use embassy_usb::{Builder, Config};
 use panic_probe as _;
-
-use embassy_runner as lib;
 
 mod aoc;
 
-assign_resources! {
-    usb: Usb {
-        usb: USB
-    },
+use cyw43_pio::PioSpi;
+use embassy_rp::bind_interrupts;
+use embassy_rp::gpio::{Level, Output};
+use embassy_rp::peripherals::{DMA_CH0, PIN_23, PIN_25, PIO0};
+use embassy_rp::pio::{InterruptHandler, Pio};
+use static_cell::StaticCell;
+
+bind_interrupts!(struct Irqs {
+    PIO0_IRQ_0 => InterruptHandler<PIO0>;
+});
+
+#[embassy_executor::task]
+async fn wifi_task(
+    runner: cyw43::Runner<
+        'static,
+        Output<'static, PIN_23>,
+        PioSpi<'static, PIN_25, PIO0, 0, DMA_CH0>,
+    >,
+) -> ! {
+    runner.run().await
 }
 
 #[embassy_executor::main]
 async fn main(#[allow(unused_variables)] spawner: Spawner) {
-    info!("Hello, world!");
-
     let p = embassy_rp::init(Default::default());
-    let r = split_resources!(p);
-    let usb = r.usb.usb;
-    let driver = Driver::new(usb, lib::Irqs);
+    let fw = include_bytes!("../cyw43-firmware/43439A0.bin");
+    let clm = include_bytes!("../cyw43-firmware/43439A0_clm.bin");
 
-    let mut config = Config::new(0xabcd, 0xabcd);
-    config.manufacturer = Some("Chris Price");
-    config.product = Some("100k of your finest bytes");
-    config.serial_number = Some("CP4096OYFB");
-    config.max_power = 100;
-    config.max_packet_size_0 = 64;
+    // To make flashing faster for development, you may want to flash the firmwares independently
+    // at hardcoded addresses, instead of baking them into the program with `include_bytes!`:
+    //     probe-rs download 43439A0.bin --format bin --chip RP2040 --base-address 0x10100000
+    //     probe-rs download 43439A0_clm.bin --format bin --chip RP2040 --base-address 0x10140000
+    //let fw = unsafe { core::slice::from_raw_parts(0x10100000 as *const u8, 230321) };
+    //let clm = unsafe { core::slice::from_raw_parts(0x10140000 as *const u8, 4752) };
 
-    let mut device_descriptor = [0; 256];
-    let mut config_descriptor = [0; 256];
-    let mut bos_descriptor = [0; 256];
-    let mut mos_descriptor = [0; 0];
-    let mut control_buf = [0; 64];
-
-    let builder = Builder::new(
-        driver,
-        config,
-        &mut device_descriptor,
-        &mut config_descriptor,
-        &mut bos_descriptor,
-        &mut mos_descriptor,
-        &mut control_buf,
+    let pwr = Output::new(p.PIN_23, Level::Low);
+    let cs = Output::new(p.PIN_25, Level::High);
+    let mut pio = Pio::new(p.PIO0, Irqs);
+    let spi = PioSpi::new(
+        &mut pio.common,
+        pio.sm0,
+        pio.irq0,
+        cs,
+        p.PIN_24,
+        p.PIN_29,
+        p.DMA_CH0,
     );
 
-    let _vendor_id = b"CHRISP  "; // per the spec, unused bytes should be a space
-    let _product_id = b"100k of trunc   ";
-    let _product_revision = b"1.24";
+    static STATE: StaticCell<cyw43::State> = StaticCell::new();
+    let state = STATE.init(cyw43::State::new());
+    let (_net_device, mut control, runner) = cyw43::new(state, pwr, spi, fw).await;
+    unwrap!(spawner.spawn(wifi_task(runner)));
 
-    let mut usb = builder.build();
-    let usb_fut = usb.run();
+    control.init(clm).await;
+    control
+        .set_power_management(cyw43::PowerManagementMode::PowerSave)
+        .await;
+
+    info!("led on!");
+    control.gpio_set(0, true).await;
 
     let mut aoc = aoc::Task::new();
 
-    let aoc_fut = aoc.run();
-    embassy_futures::join::join(usb_fut, aoc_fut).await;
+    aoc.run().await;
+
+    info!("led off!");
+    control.gpio_set(0, false).await;
 }
