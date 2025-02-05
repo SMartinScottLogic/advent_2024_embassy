@@ -5,12 +5,13 @@
 
 extern crate core;
 
-use defmt::{info, unwrap};
+use defmt::unwrap;
 use defmt_rtt as _;
 use embassy_executor::Spawner;
 use panic_probe as _;
 
 mod aoc;
+mod fmt;
 
 use cyw43_pio::PioSpi;
 use embassy_rp::bind_interrupts;
@@ -75,7 +76,7 @@ async fn main(#[allow(unused_variables)] spawner: Spawner) {
 
     let mut aoc = aoc::Task::new();
 
-    aoc.run().await;
+    aoc.run();
 
     info!("led off!");
     control.gpio_set(0, false).await;

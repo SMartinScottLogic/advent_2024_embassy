@@ -7,7 +7,7 @@ impl AocTask {
     pub fn new() -> Self {
         Self {}
     }
-    pub async fn run(&mut self) {
+    pub fn run(&mut self) {
         let mut solution = Solution::new();
         solution.run_sample();
         solution.run_full();

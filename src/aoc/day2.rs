@@ -1,7 +1,7 @@
 use core::cmp::Ordering;
 
+use crate::{error, info};
 use arrayvec::ArrayVec;
-use defmt::{error, info};
 
 use nom::bytes::complete::tag;
 use nom::combinator::map_res;
