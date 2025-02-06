@@ -1,5 +1,5 @@
+use crate::{error, info};
 use arrayvec::ArrayVec;
-use defmt::{error, info};
 
 use nom::combinator::map_res;
 use nom::combinator::{iterator, opt};

@@ -1,5 +1,5 @@
+use crate::{debug, info};
 use arrayvec::ArrayVec;
-use defmt::{debug, info};
 
 use nom::{combinator::map_res, IResult};
 use scapegoat::SgMap;

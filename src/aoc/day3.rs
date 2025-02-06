@@ -1,4 +1,4 @@
-use defmt::info;
+use crate::info;
 
 use nom::branch::alt;
 use nom::bytes::complete::tag;

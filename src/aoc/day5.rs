@@ -1,7 +1,7 @@
 use core::cmp::Ordering;
 
+use crate::{debug, error, info};
 use arrayvec::ArrayVec;
-use defmt::{debug, error, info};
 use nom::{
     branch::alt,
     bytes::complete::tag,

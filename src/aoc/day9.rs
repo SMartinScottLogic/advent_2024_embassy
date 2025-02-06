@@ -1,5 +1,6 @@
 use arrayvec::ArrayVec;
-use defmt::info;
+
+use crate::info;
 
 type ResultType = u64;
 
