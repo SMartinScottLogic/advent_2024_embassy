@@ -1,26 +1,9 @@
-# advent_2024
+# advent_2024_embassy
+Run on Pico
+* cargo run --features defmt
 
-## Setup new day
-To setup a new day, ready for solving, run:
-```
-cargo xtask setup day${N}
-```
-Where `N` is the day number, for example:
-```
-cargo xtask setup day2
-```
-Will setup `day2` (does NOT perform any git actions)
+Run on Local (linux)
+* cargo run --target=x86_64-unknown-linux-gnu --bin linuxmain --features log
 
-## Running a day
-To run the code for a day `{N}`:
-```
-cargo run --package day{N} --example runner
-```
-This will (by default):
-* read (and analyse) a sample input file: `input/day{N}.sample`
-* read (and analyse) a full input file: `input/day{N}.full`
-
-For additional options, run:
-```
-cargo run --package day{N} --example runner -- --help
-```
+Run on Local (windows)
+* cargo run --target=x86_64-pc-windows-msvc --bin winmain --features log
