@@ -1,6 +1,6 @@
 use core::cmp::Ordering;
 
-use crate::{error, info};
+use crate::{debug, error, info};
 use arrayvec::ArrayVec;
 
 use nom::bytes::complete::tag;
@@ -38,7 +38,7 @@ fn run(label: &'static str, data: &[u8]) {
     let mut step1_answer = 0;
     let mut step2_answer = 0;
     for (row, line) in (&mut it).enumerate() {
-        info!("{} {}: {}", label, row, line.len());
+        debug!("{} {}: {}", label, row, line.len());
         if is_safe_part1(line.as_ref()) {
             step1_answer += 1;
             step2_answer += 1;

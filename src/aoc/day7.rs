@@ -1,4 +1,4 @@
-use crate::{error, info};
+use crate::{debug, error, info};
 use arrayvec::ArrayVec;
 
 use nom::bytes::complete::tag;
@@ -37,7 +37,7 @@ fn run(label: &'static str, data: &[u8]) {
     let mut total2 = 0;
     loop {
         if let Ok((r, (answer, values))) = parse(data) {
-            info!("{}: {} -> {} values", row, answer, values.len());
+            debug!("{}: {} -> {} values", row, answer, values.len());
             if can_be_true(&answer, values.as_ref(), false) {
                 total1 += answer;
             }
