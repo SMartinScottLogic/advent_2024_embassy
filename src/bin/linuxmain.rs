@@ -5,9 +5,12 @@
 #![no_std] // don't link the Rust standard library
 #![no_main] // disable all Rust-level entry points
 #![cfg(target_os = "linux")]
+#![feature(lang_items)]
 
 use core::arch::asm;
 use core::panic::PanicInfo;
+
+use embassy_runner::{aoc, info};
 
 // https://man7.org/linux/man-pages/man2/write.2.html
 // ```c
@@ -47,8 +50,41 @@ fn sys_exit(status: i32) -> ! {
     }
 }
 
+struct ConsoleLogger;
+
+impl log::Log for ConsoleLogger {
+    fn enabled(&self, metadata: &log::Metadata) -> bool {
+        metadata.level() <= log::Level::Info
+    }
+
+    fn log(&self, record: &log::Record) {
+        use core::fmt::Write;
+        if self.enabled(record.metadata()) {
+            unsafe {
+                let mut buf: arrayvec::ArrayString<1024> = arrayvec::ArrayString::new();
+
+                write!(buf, "{} - {}\n", record.level(), record.args());
+
+                let ret = sys_write(1, buf.as_ptr(), buf.len());
+                if ret != buf.len() {
+                    sys_exit(1);
+                }
+            }
+        }
+    }
+
+    fn flush(&self) {}
+}
+
+static LOGGER: ConsoleLogger = ConsoleLogger;
+
+pub fn init() -> Result<(), log::SetLoggerError> {
+    log::set_logger(&LOGGER).map(|()| log::set_max_level(log::LevelFilter::Info))
+}
+
 #[no_mangle] // don't mangle the name of this function
 pub extern "C" fn _start() -> ! {
+    init();
     // this function is the entry point, since the linker looks for a function
     // named `_start` by default
 
@@ -58,6 +94,11 @@ pub extern "C" fn _start() -> ! {
         sys_exit(1);
     }
 
+    info!("test");
+    let mut aoc = crate::aoc::Task::new();
+
+    aoc.run();
+
     sys_exit(0);
 }
 
@@ -66,3 +107,6 @@ pub extern "C" fn _start() -> ! {
 fn panic(_info: &PanicInfo) -> ! {
     loop {}
 }
+
+#[lang = "eh_personality"]
+fn eh_personality() {}

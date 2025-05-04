@@ -2,7 +2,14 @@
 rustflags = ["-C", "panic=abort"]
 
 [target.'cfg(target_os = "linux")']
-rustflags = ["-C", "panic=abort"]
+rustflags = [
+  "-C",
+  "panic=abort",
+  "-C",
+  "link-arg=-nostartfiles",
+  "-C",
+  "link-arg=-lc",
+]
 
 [target.'cfg(all(target_arch = "arm", target_os = "none"))']
 # Choose a default "cargo run" tool (see README for more info)
