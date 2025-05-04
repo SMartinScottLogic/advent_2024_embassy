@@ -16,3 +16,4 @@ dumps/*.txt
 
 # Advent of Code input data
 /input/
+linker.map
