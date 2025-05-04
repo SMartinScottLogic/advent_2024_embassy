@@ -1,6 +1,8 @@
 use arrayvec::ArrayVec;
 use static_cell::StaticCell;
 
+use nonmax::NonMaxU16;
+
 use crate::{debug, info};
 
 type ResultType = u64;
@@ -64,13 +66,13 @@ fn analyse_part2(data: &[u8], blocks: &mut ArrayVec<Block, NUM_BLOCKS>) -> Resul
     diskmap(data, blocks);
 
     let mut e = (blocks.len() - 1) as isize;
-    let mut seen = usize::MAX;
+    let mut seen = u16::MAX;
 
     loop {
         while e >= 0
             && (
                 match blocks[e as usize] {
-                    Block::FileBlock(b) if b < seen => false,
+                    Block::FileBlock(b) if b.get() < seen => false,
                     _ => true,
                 }
                 // || handled.contains(&blocks[e as usize])
@@ -85,7 +87,7 @@ fn analyse_part2(data: &[u8], blocks: &mut ArrayVec<Block, NUM_BLOCKS>) -> Resul
         //handled.insert(blocks[e as usize]);
         match blocks[e as usize] {
             Block::FileBlock(b) => {
-                seen = b;
+                seen = b.get();
             }
             _ => panic!(),
         };
@@ -136,7 +138,7 @@ fn checksum(blocks: &[Block]) -> ResultType {
         .enumerate()
         .map(|(pos, block)| {
             if let Block::FileBlock(id) = block {
-                (*id as ResultType) * (pos as ResultType)
+                (id.get() as ResultType) * (pos as ResultType)
             } else {
                 0
             }
@@ -148,7 +150,7 @@ fn checksum(blocks: &[Block]) -> ResultType {
 enum Block {
     #[default]
     Empty,
-    FileBlock(usize),
+    FileBlock(NonMaxU16),
 }
 
 fn diskmap(map: &[u8], blocks: &mut ArrayVec<Block, NUM_BLOCKS>) {
@@ -156,7 +158,8 @@ fn diskmap(map: &[u8], blocks: &mut ArrayVec<Block, NUM_BLOCKS>) {
     for (id, c) in map.iter().enumerate() {
         let c = *c - b'0';
         let s = if id % 2 == 0 {
-            Block::FileBlock(id / 2)
+            let id = NonMaxU16::new((id / 2) as u16).unwrap();
+            Block::FileBlock(id)
         } else {
             Block::Empty
         };
